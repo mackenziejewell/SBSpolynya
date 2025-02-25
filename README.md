@@ -1,5 +1,5 @@
-# plot_simply
-Functions for quicker use of common plotting tools, especially involving geographic plots
+# SBSpolynya
+analysis os Southern Beaufort Sea polynya.
 
 ### To build matching environment:
 

@@ -1,4 +1,4 @@
-name: plot_simply
+name: SBSpolynya
 channels:
   - conda-forge
   - defaults
@@ -63,11 +63,11 @@ dependencies:
   - bzip2=1.0.8=h6c40b1e_5
   - c-ares=1.19.1=h6c40b1e_0
   - c-blosc2=2.14.4=h0ae8482_1
-  - ca-certificates=2024.8.30=h8857fd0_0
+  - ca-certificates=2024.12.31=hecd8cb5_0
   - cached-property=1.5.2=py_0
   - cachetools=4.2.2=pyhd3eb1b0_0
   - cartopy=0.23.0=py312h1171441_1
-  - certifi=2024.8.30=pyhd8ed1ab_0
+  - certifi=2025.1.31=py312hecd8cb5_0
   - cffi=1.16.0=py312h6c40b1e_0
   - cfitsio=3.470=hbd21bf8_7
   - cftime=1.6.2=py312h32608ca_1
@@ -131,6 +131,7 @@ dependencies:
   - grpc-cpp=1.48.2=hbe2b35a_4
   - gst-plugins-base=1.14.1=hcec6c5f_1
   - gstreamer=1.14.1=h6c40b1e_1
+  - gsw=3.6.19=py312h3a11e2b_1
   - gtest=1.14.0=ha357a0b_0
   - h5py=3.11.0=nompi_py312hfc94b03_102
   - hdf4=4.2.15=h7aa5921_5
@@ -284,7 +285,7 @@ dependencies:
   - openblas=0.3.1=hd130d23_0
   - openjpeg=2.4.0=h66ea3da_0
   - openpyxl=3.0.10=py312h6c40b1e_0
-  - openssl=3.3.2=hd23fc13_0
+  - openssl=3.4.1=hc426f3f_0
   - orc=1.7.4=h995b336_1
   - overrides=7.4.0=py312hecd8cb5_0
   - packaging=23.2=py312hecd8cb5_0
@@ -481,4 +482,4 @@ dependencies:
   - zope=1.0=py312hecd8cb5_1
   - zope.interface=5.4.0=py312h6c40b1e_0
   - zstd=1.5.5=hc035e20_0
-prefix: /opt/anaconda3/envs/plot_simply
+prefix: /opt/anaconda3/envs/SBSpolynya

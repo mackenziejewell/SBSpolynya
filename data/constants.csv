@@ -1,0 +1,3 @@
+var,long_name,value,units
+Cp_o,seawater heat capacity,3850,J / (kg delta_degC)
+rho_o,seawater density,1028,kg/m^3
