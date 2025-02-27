@@ -1,3 +1,5 @@
 var,long_name,value,units
-Cp_o,seawater heat capacity,3850,J / (kg delta_degC)
-rho_o,seawater density,1028,kg/m^3
+Cp_o,seawater heat capacity,3850.0,J / (kg delta_degC)
+rho_o,seawater density,1028.0,kg/m^3
+kappa,Von Karman Constant,0.4,dimensionless
+St,Stanton number,0.0057,dimensionless
