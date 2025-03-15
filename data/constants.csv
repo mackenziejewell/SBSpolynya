@@ -1,5 +1,12 @@
 var,long_name,value,units
 Cp_o,seawater heat capacity,3850.0,J / (kg delta_degC)
+Cp_a,air heat capacity,1004.0,J / (kg delta_degC)
+sigma_sb,Stefan-Boltzmann constant,5.670367e-08,W / (m**2 degree_Kelvin**4)
+rho_a,air density,1.225,kg/m^3
 rho_o,seawater density,1028.0,kg/m^3
+rho_i,new sea ice density,917.0,kg/m^3
+L_i,latent heat of fusion,334000.0,J/kg
+k_i,sea ice thermal conductivity,2.2,W / (m delta_degC)
 kappa,Von Karman Constant,0.4,dimensionless
 St,Stanton number,0.0057,dimensionless
+omega,Earth rotation rate,7.2921e-05,rad/s
