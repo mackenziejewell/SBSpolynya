@@ -1,0 +1,108 @@
+
+
+# DEPENDENCIES:
+import pandas as pd
+from datetime import datetime
+import xarray as xr
+import sys
+import matplotlib.pyplot as plt
+import matplotlib.colors
+import numpy as np, numpy.ma as ma
+import matplotlib.cm as cm
+import cartopy, cartopy.crs as ccrs
+
+# cartopy plotting
+sys.path.append('../')
+import plot_simply.geomap as geomap
+import data_NSIDC.icedrift as icedrift
+
+# standard maps to re-use throughout codes
+def makemap(view = 'wide', contours = [], figsize=(8,6)):
+
+    map_proj = ccrs.NorthPolarStereo(central_longitude=-140)
+
+    fig, ax = plt.subplots(subplot_kw=dict(projection=map_proj), figsize=figsize)
+    ax.set_facecolor('lightgray')
+
+    geomap.land(ax, scale = '10m', color='darkgray', alpha=1, fill_dateline_gap = False, zorder=2)
+
+    if len(contours)>0:
+        geomap.gebco_bathymetry(ax, file_path='/Volumes/Seagate_Jewell/KenzieStuff/GEBCO/GEBCO_2024/gebco_2024_n90.0_s55.0_w-180.0_e180.0.nc', 
+                             crop_lat=(69, 73.5), crop_lon=(-170, -110), clat=8, clon=15, depth_shade=False, 
+                             shade_zorder=0, depth_contours=True, contour_levels=contours, 
+                             contour_kwargs={'colors': 'gray', 'linewidths': 1, 'linestyles': 'solid', 'zorder': 100},
+                             contour_labels=False, text_kwargs={'size': 10, 'color': 'gray', 'weight': 'normal', 'zorder': 100})
+
+
+    if view == 'wide':
+        ax.set_xlim(-700000,500000)
+        ax.set_ylim(-2400000,-1900000)
+        
+    elif view == 'very_wide':
+        ax.set_ylim(-2400000,-1300000)
+        ax.set_xlim(-600000,450000)
+       
+    elif view == 'zoom':
+        ax.set_ylim(-2400000,-2050000)
+        ax.set_xlim(-220000,180000)
+
+
+    return fig, ax
+        
+
+
+
+
+
+def open_daily_winds(year, lat_range, lon_range, time_range = None):
+    
+    ds = xr.open_dataset(f'/Volumes/Jewell_EasyStore/ECMWF/annual/daily/ERA5_{year}_daily.nc')
+    ds.close()
+    if time_range == None:
+        ds = ds.sel(latitude = lat_range, longitude = lon_range)
+    else:
+        ds = ds.sel(time = time_range, latitude = lat_range, longitude = lon_range)
+        
+    return ds
+
+def open_daily_t2m(year, lat_range, lon_range, time_range = None):
+    
+    ds = xr.open_dataset(f'/Volumes/Seagate_Jewell/KenzieStuff/ERA5/daily_t2m/ERA5_T2m_daily_{year}.nc')
+    ds.close()
+    
+    if time_range == None:
+        ds = ds.sel(latitude = lat_range, longitude = lon_range)
+    else:
+        ds = ds.sel(valid_time = time_range, latitude = lat_range, longitude = lon_range)
+    
+    return ds
+
+
+def open_daily_drift(year, lat_range, lon_range, time_range = None):
+    
+    if type(time_range) == pd.Timestamp or type(time_range) == datetime:
+        dates = time_range
+    elif time_range == None:
+        dates = pd.to_datetime(pd.date_range(datetime(year,1,1),datetime(year,12,31), freq='1D'))
+    else:
+        dates = pd.to_datetime(pd.date_range(time_range.start, time_range.stop, freq='1D'))
+        
+    drift = icedrift.open_local_file(dates, crop = [180,310,80,220],include_units = False)
+    
+    
+    drift2 = {}
+    drift2['u'] = drift['u']
+    drift2['v'] = drift['v']
+    drift2['e'] = drift['e']
+    drift2['n'] = drift['n']
+    
+    drift2['proj'] = drift['proj']
+    drift2['xx'] = drift['xx']
+    drift2['yy'] = drift['yy']
+    drift2['lon'] = drift['lon']
+    drift2['lat'] = drift['lat']
+    
+    drift2['s'] = np.sqrt(drift['e']**2+drift['n']**2)
+
+    return drift2
+
