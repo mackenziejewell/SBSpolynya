@@ -11,9 +11,12 @@ import numpy as np, numpy.ma as ma
 import matplotlib.cm as cm
 import cartopy, cartopy.crs as ccrs
 
+from metpy.units import units
+
 # cartopy plotting
 sys.path.append('../')
 import plot_simply.geomap as geomap
+import geofunc.vectors as vectors
 import data_NSIDC.icedrift as icedrift
 
 # standard maps to re-use throughout codes
@@ -41,18 +44,24 @@ def makemap(view = 'wide', contours = [], figsize=(8,6)):
     elif view == 'very_wide':
         ax.set_ylim(-2400000,-1300000)
         ax.set_xlim(-600000,450000)
+
+
+    elif view == 'very_tall':
+        ax.set_ylim(-2400000,-1100000)
+        ax.set_xlim(-1000000,500000)
        
     elif view == 'zoom':
         ax.set_ylim(-2400000,-2050000)
         ax.set_xlim(-220000,180000)
 
 
+    elif view == 'reallyzoom':
+        ax.set_ylim(-2360000,-2150000)
+        ax.set_xlim(-200000,160000)
+
+
     return fig, ax
         
-
-
-
-
 
 def open_daily_winds(year, lat_range, lon_range, time_range = None):
     
@@ -76,7 +85,6 @@ def open_daily_t2m(year, lat_range, lon_range, time_range = None):
         ds = ds.sel(valid_time = time_range, latitude = lat_range, longitude = lon_range)
     
     return ds
-
 
 def open_daily_drift(year, lat_range, lon_range, time_range = None):
     
@@ -106,3 +114,93 @@ def open_daily_drift(year, lat_range, lon_range, time_range = None):
 
     return drift2
 
+
+
+def drift_map_over_time(dates, map_proj):
+
+    import warnings
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    warnings.filterwarnings("ignore", category=RuntimeWarning)
+ 
+
+
+    drift_map = icedrift.open_local_file(pd.to_datetime(dates),
+                        main_path = '/Volumes/Jewell_EasyStore/NSIDC-0116_PPdrift/', 
+                        filenametype = 'icemotion_daily_nh_25km_{}0101_{}1231_v4.1.nc', 
+                        crop = [220,265,110,160],
+                        include_units = False)
+    
+    E = np.nanmean(drift_map['e'], axis=0)
+    N = np.nanmean(drift_map['n'], axis=0)
+    # Ep, Np = geomap.fix_cartopy_vectors(E,N,drift_map['lat'])
+
+    E_scaled = np.zeros(E.shape)
+    N_scaled = np.zeros(N.shape)
+
+    X_scaled = np.zeros(E.shape)
+    Y_scaled = np.zeros(E.shape)
+    
+    for ii in range(np.shape(E_scaled)[0]):
+        for jj in range(np.shape(N_scaled)[0]):
+
+            tail, tip, vec = vectors.project_vectors(map_proj, 
+                                                    drift_map['lon'][ii,jj], 
+                                                    drift_map['lat'][ii,jj], 
+                                                    eastward = E[ii,jj]*units('cm/s'), 
+                                                    northward = N[ii,jj]*units('cm/s'), 
+                                            final_units = 'm/day')
+
+            E_scaled[ii,jj] = vec[0].magnitude
+            N_scaled[ii,jj] = vec[1].magnitude
+
+            X_scaled[ii,jj] = tail[0]
+            Y_scaled[ii,jj] = tail[1]
+            
+        drift_map['E_scaled'] = E_scaled
+        drift_map['N_scaled'] = N_scaled
+        
+        drift_map['X_scaled'] = X_scaled
+        drift_map['Y_scaled'] = Y_scaled
+
+    warnings.filterwarnings("default", category=DeprecationWarning) 
+    warnings.filterwarnings("default", category=RuntimeWarning)        
+
+    return drift_map
+
+
+def wind_map_over_time(dates, map_proj, era_lat = slice(75, 68), era_lon = slice(-158,-125)):
+
+
+
+
+    era_map = {}
+
+    counter = 0
+    for date in pd.to_datetime(dates):
+        try:
+            filename = f'/Volumes/Jewell_EasyStore/ECMWF/annual/daily/ERA5_{date.year}_daily.nc'
+            with xr.open_dataset(filename) as ds:
+                ds_crop = ds.sel(time=date, latitude=era_lat, longitude = era_lon)
+                counter+=1
+                exists=True
+        except:
+            print(f'missing {date}')
+            exists = False
+
+        if exists:
+            if counter == 1:
+                u10_grid = ds_crop.u10.values
+                v10_grid = ds_crop.v10.values
+                msl_grid = ds_crop.msl.values
+            else:
+                u10_grid = np.reshape(np.append(u10_grid, ds_crop.u10.values), (counter, *ds_crop.u10.values.shape))
+                v10_grid = np.reshape(np.append(v10_grid, ds_crop.v10.values), (counter, *ds_crop.u10.values.shape))
+                msl_grid = np.reshape(np.append(msl_grid, ds_crop.msl.values), (counter, *ds_crop.u10.values.shape))
+
+    era_map['u10'] = u10_grid
+    era_map['v10'] = v10_grid
+    era_map['msl'] = msl_grid
+    
+    era_map['lon'], era_map['lat'] = np.meshgrid(ds_crop.longitude.values, ds_crop.latitude.values)
+
+    return era_map
