@@ -20,47 +20,60 @@ import geofunc.vectors as vectors
 import data_NSIDC.icedrift as icedrift
 
 # standard maps to re-use throughout codes
-def makemap(view = 'wide', contours = [], figsize=(8,6)):
+def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
 
     map_proj = ccrs.NorthPolarStereo(central_longitude=-140)
 
-    fig, ax = plt.subplots(subplot_kw=dict(projection=map_proj), figsize=figsize)
-    ax.set_facecolor('lightgray')
+    if panels==(1,1):
+        fig, ax = plt.subplots(subplot_kw=dict(projection=map_proj), figsize=figsize)
+        axs = [ax]
 
-    geomap.land(ax, scale = '10m', color='darkgray', alpha=1, fill_dateline_gap = False, zorder=2)
+    else:
+        fig, AXS = plt.subplots(*panels, subplot_kw=dict(projection=map_proj), figsize=figsize)
+        axs = AXS.ravel()
 
-    if len(contours)>0:
-        geomap.gebco_bathymetry(ax, file_path='/Volumes/Seagate_Jewell/KenzieStuff/GEBCO/GEBCO_2024/gebco_2024_n90.0_s55.0_w-180.0_e180.0.nc', 
-                             crop_lat=(69, 73.5), crop_lon=(-170, -110), clat=8, clon=15, depth_shade=False, 
-                             shade_zorder=0, depth_contours=True, contour_levels=contours, 
-                             contour_kwargs={'colors': 'gray', 'linewidths': 1, 'linestyles': 'solid', 'zorder': 100},
-                             contour_labels=False, text_kwargs={'size': 10, 'color': 'gray', 'weight': 'normal', 'zorder': 100})
+    for ax in axs:
+        ax.set_facecolor('lightgray')
+
+        geomap.land(ax, scale = '10m', color='darkgray', alpha=1, fill_dateline_gap = False, zorder=2)
+
+        if len(contours)>0:
+            geomap.gebco_bathymetry(ax, file_path='/Volumes/Seagate_Jewell/KenzieStuff/GEBCO/GEBCO_2024/gebco_2024_n90.0_s55.0_w-180.0_e180.0.nc', 
+                                crop_lat=(69, 73.5), crop_lon=(-170, -110), clat=8, clon=15, depth_shade=False, 
+                                shade_zorder=0, depth_contours=True, contour_levels=contours, 
+                                contour_kwargs={'colors': 'gray', 'linewidths': 1, 'linestyles': 'solid', 'zorder': 100},
+                                contour_labels=False, text_kwargs={'size': 10, 'color': 'gray', 'weight': 'normal', 'zorder': 100})
 
 
-    if view == 'wide':
-        ax.set_xlim(-700000,500000)
-        ax.set_ylim(-2400000,-1900000)
+        if view == 'wide':
+            ax.set_xlim(-700000,500000)
+            ax.set_ylim(-2400000,-1900000)
+            
+        elif view == 'very_wide':
+            ax.set_ylim(-2400000,-1300000)
+            ax.set_xlim(-600000,450000)
+
+
+        elif view == 'very_tall':
+            ax.set_ylim(-2400000,-1100000)
+            ax.set_xlim(-1000000,500000)
         
-    elif view == 'very_wide':
-        ax.set_ylim(-2400000,-1300000)
-        ax.set_xlim(-600000,450000)
+        elif view == 'zoom':
+            ax.set_ylim(-2400000,-2050000)
+            ax.set_xlim(-220000,180000)
 
 
-    elif view == 'very_tall':
-        ax.set_ylim(-2400000,-1100000)
-        ax.set_xlim(-1000000,500000)
-       
-    elif view == 'zoom':
-        ax.set_ylim(-2400000,-2050000)
-        ax.set_xlim(-220000,180000)
+        elif view == 'wider_zoom':
+            ax.set_ylim(-2400000,-2000000)
+            ax.set_xlim(-500000,180000)
 
 
-    elif view == 'reallyzoom':
-        ax.set_ylim(-2360000,-2150000)
-        ax.set_xlim(-200000,160000)
+        elif view == 'reallyzoom':
+            ax.set_ylim(-2360000,-2150000)
+            ax.set_xlim(-200000,160000)
 
 
-    return fig, ax
+    return fig, axs
         
 
 def open_daily_winds(year, lat_range, lon_range, time_range = None):
