@@ -64,15 +64,16 @@ def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
 
 
         elif view == 'wider_zoom':
-            ax.set_ylim(-2400000,-2000000)
-            ax.set_xlim(-500000,180000)
+            ax.set_ylim(-2400000,-1950000)
+            ax.set_xlim(-500000,280000)
 
 
         elif view == 'reallyzoom':
             ax.set_ylim(-2360000,-2150000)
             ax.set_xlim(-200000,160000)
 
-
+    if panels==(1,1):
+        axs = ax
     return fig, axs
         
 
