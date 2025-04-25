@@ -11,6 +11,7 @@ import numpy as np, numpy.ma as ma
 import matplotlib.cm as cm
 import cartopy, cartopy.crs as ccrs
 
+import metpy.calc as mpcalc
 from metpy.units import units
 
 # cartopy plotting
@@ -66,6 +67,10 @@ def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
         elif view == 'wider_zoom':
             ax.set_ylim(-2400000,-1950000)
             ax.set_xlim(-500000,280000)
+
+        elif view == 'wider_zoom2':
+            ax.set_ylim(-2350000,-2020000)
+            ax.set_xlim(-400000,130000)
 
 
         elif view == 'reallyzoom':
@@ -185,8 +190,6 @@ def drift_map_over_time(dates, map_proj):
 def wind_map_over_time(dates, map_proj, era_lat = slice(75, 68), era_lon = slice(-158,-125)):
 
 
-
-
     era_map = {}
 
     counter = 0
@@ -206,14 +209,21 @@ def wind_map_over_time(dates, map_proj, era_lat = slice(75, 68), era_lon = slice
                 u10_grid = ds_crop.u10.values
                 v10_grid = ds_crop.v10.values
                 msl_grid = ds_crop.msl.values
+                vort_grid = mpcalc.vorticity(ds_crop.u10*units('m/s'), ds_crop.v10*units('m/s'), 
+                                             latitude=ds_crop.latitude, longitude=ds_crop.longitude).values
+
             else:
                 u10_grid = np.reshape(np.append(u10_grid, ds_crop.u10.values), (counter, *ds_crop.u10.values.shape))
                 v10_grid = np.reshape(np.append(v10_grid, ds_crop.v10.values), (counter, *ds_crop.u10.values.shape))
                 msl_grid = np.reshape(np.append(msl_grid, ds_crop.msl.values), (counter, *ds_crop.u10.values.shape))
+                vort = mpcalc.vorticity(ds_crop.u10*units('m/s'), ds_crop.v10*units('m/s'), 
+                                             latitude=ds_crop.latitude, longitude=ds_crop.longitude).values
+                vort_grid = np.reshape(np.append(vort_grid, vort), (counter, *ds_crop.u10.values.shape))
 
     era_map['u10'] = u10_grid
     era_map['v10'] = v10_grid
     era_map['msl'] = msl_grid
+    era_map['vort'] = vort_grid
     
     era_map['lon'], era_map['lat'] = np.meshgrid(ds_crop.longitude.values, ds_crop.latitude.values)
 
