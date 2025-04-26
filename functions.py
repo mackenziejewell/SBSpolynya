@@ -50,14 +50,19 @@ def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
             ax.set_xlim(-700000,500000)
             ax.set_ylim(-2400000,-1900000)
             
-        elif view == 'very_wide':
+        elif view == 'very_tall':
             ax.set_ylim(-2400000,-1300000)
             ax.set_xlim(-600000,450000)
 
 
-        elif view == 'very_tall':
+        elif view == 'very_wide':
             ax.set_ylim(-2400000,-1100000)
             ax.set_xlim(-1000000,500000)
+
+        elif view == 'large_view':
+            ax.set_extent([-170, -120, 68, 80], ccrs.PlateCarree())
+            # ax.set_ylim(-2500000,-1000000)
+            # ax.set_xlim(-1200000,800000)
         
         elif view == 'zoom':
             ax.set_ylim(-2400000,-2050000)
