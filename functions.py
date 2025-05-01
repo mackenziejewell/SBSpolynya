@@ -82,6 +82,10 @@ def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
             ax.set_ylim(-2360000,-2150000)
             ax.set_xlim(-200000,160000)
 
+        elif view == 'narrowzoom':
+            ax.set_ylim(-2330000,-2180000)
+            ax.set_xlim(-170000,100000)
+
     if panels==(1,1):
         axs = ax
     return fig, axs
@@ -233,3 +237,19 @@ def wind_map_over_time(dates, map_proj, era_lat = slice(75, 68), era_lon = slice
     era_map['lon'], era_map['lat'] = np.meshgrid(ds_crop.longitude.values, ds_crop.latitude.values)
 
     return era_map
+
+
+def find_consecutive_values(arr):
+    # if not arr:
+    #     return []
+
+    result = []
+    start_index = 0
+    for i in range(1, len(arr)):
+        if arr[i] != arr[i - 1] + 1:
+            if i - start_index > 1:
+                result.append((start_index, i - 1))
+            start_index = i
+    if len(arr) - start_index > 1:
+        result.append((start_index, len(arr) - 1))
+    return result
