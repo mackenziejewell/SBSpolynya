@@ -24,7 +24,9 @@ import data_NSIDC.icedrift as icedrift
 def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
 
     map_proj = ccrs.NorthPolarStereo(central_longitude=-140)
-
+#     if view in ['shelf_view', 'small_region']:
+#         map_proj = ccrs.NorthPolarStereo(central_longitude=-143)
+        
     if panels==(1,1):
         fig, ax = plt.subplots(subplot_kw=dict(projection=map_proj), figsize=figsize)
         axs = [ax]
@@ -42,7 +44,7 @@ def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
             geomap.gebco_bathymetry(ax, file_path='/Volumes/Seagate_Jewell/KenzieStuff/GEBCO/GEBCO_2024/gebco_2024_n90.0_s55.0_w-180.0_e180.0.nc', 
                                 crop_lat=(69, 73.5), crop_lon=(-170, -110), clat=8, clon=15, depth_shade=False, 
                                 shade_zorder=0, depth_contours=True, contour_levels=contours, 
-                                contour_kwargs={'colors': 'gray', 'linewidths': 1, 'linestyles': 'solid', 'zorder': 100},
+                                contour_kwargs={'colors': 'gray', 'linewidths': 0.75, 'linestyles': 'solid', 'zorder': 100},
                                 contour_labels=False, text_kwargs={'size': 10, 'color': 'gray', 'weight': 'normal', 'zorder': 100})
 
 
@@ -58,12 +60,36 @@ def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
         elif view == 'very_wide':
             ax.set_ylim(-2400000,-1100000)
             ax.set_xlim(-1000000,500000)
+            
+        elif view == 'circle_view':
+            import matplotlib.path as mpath
+            ax.set_extent([0, 360,  60, 90], ccrs.PlateCarree())
+            theta = np.linspace(0, 2*np.pi, 100)
+            center, radius = [0.5, 0.5], 0.5
+            verts = np.vstack([np.sin(theta), np.cos(theta)]).T
+            circle = mpath.Path(verts * radius + center)
+
+            ax.set_boundary(circle, transform=ax.transAxes)
 
         elif view == 'large_view':
-            ax.set_extent([-170, -120, 68, 80], ccrs.PlateCarree())
+            ax.set_extent([199, 235,  67.5, 80], ccrs.PlateCarree())
+
+
+
+#             ax.set_extent([-180, -105, 68, 90], ccrs.PlateCarree())
             # ax.set_ylim(-2500000,-1000000)
             # ax.set_xlim(-1200000,800000)
         
+        elif view == 'shelf_view':
+            ax.set_ylim(-2400000,-1850000)
+            ax.set_xlim(-780000,350000)
+            
+#         elif view == 'small_region':
+#             ax.set_ylim(-2350000,-2020000)
+#             ax.set_xlim(-200000,330000)
+            
+         
+            
         elif view == 'zoom':
             ax.set_ylim(-2400000,-2050000)
             ax.set_xlim(-220000,180000)
@@ -72,6 +98,11 @@ def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
         elif view == 'wider_zoom':
             ax.set_ylim(-2400000,-1950000)
             ax.set_xlim(-500000,280000)
+            
+            
+        elif view == 'tall_zoom':
+            ax.set_ylim(-2395000,-1940000)
+            ax.set_xlim(-420000,185000)
 
         elif view == 'wider_zoom2':
             ax.set_ylim(-2350000,-2020000)
@@ -144,18 +175,21 @@ def open_daily_drift(year, lat_range, lon_range, time_range = None):
 
 
 
-def drift_map_over_time(dates, map_proj):
+def drift_map_over_time(dates, map_proj, crop = True):
 
     import warnings
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=RuntimeWarning)
  
 
-
+    if crop:
+        crop = [220,265,110,160]
+    else:
+        crop = [0,None,0,None]
     drift_map = icedrift.open_local_file(pd.to_datetime(dates),
                         main_path = '/Volumes/Jewell_EasyStore/NSIDC-0116_PPdrift/', 
                         filenametype = 'icemotion_daily_nh_25km_{}0101_{}1231_v4.1.nc', 
-                        crop = [220,265,110,160],
+                        crop = crop,
                         include_units = False)
     
     E = np.nanmean(drift_map['e'], axis=0)
@@ -215,24 +249,24 @@ def wind_map_over_time(dates, map_proj, era_lat = slice(75, 68), era_lon = slice
 
         if exists:
             if counter == 1:
-                u10_grid = ds_crop.u10.values
-                v10_grid = ds_crop.v10.values
+#                 u10_grid = ds_crop.u10.values
+#                 v10_grid = ds_crop.v10.values
                 msl_grid = ds_crop.msl.values
-                vort_grid = mpcalc.vorticity(ds_crop.u10*units('m/s'), ds_crop.v10*units('m/s'), 
-                                             latitude=ds_crop.latitude, longitude=ds_crop.longitude).values
+#                 vort_grid = mpcalc.vorticity(ds_crop.u10*units('m/s'), ds_crop.v10*units('m/s'), 
+#                                              latitude=ds_crop.latitude, longitude=ds_crop.longitude).values
 
             else:
-                u10_grid = np.reshape(np.append(u10_grid, ds_crop.u10.values), (counter, *ds_crop.u10.values.shape))
-                v10_grid = np.reshape(np.append(v10_grid, ds_crop.v10.values), (counter, *ds_crop.u10.values.shape))
+#                 u10_grid = np.reshape(np.append(u10_grid, ds_crop.u10.values), (counter, *ds_crop.u10.values.shape))
+#                 v10_grid = np.reshape(np.append(v10_grid, ds_crop.v10.values), (counter, *ds_crop.u10.values.shape))
                 msl_grid = np.reshape(np.append(msl_grid, ds_crop.msl.values), (counter, *ds_crop.u10.values.shape))
-                vort = mpcalc.vorticity(ds_crop.u10*units('m/s'), ds_crop.v10*units('m/s'), 
-                                             latitude=ds_crop.latitude, longitude=ds_crop.longitude).values
-                vort_grid = np.reshape(np.append(vort_grid, vort), (counter, *ds_crop.u10.values.shape))
+#                 vort = mpcalc.vorticity(ds_crop.u10*units('m/s'), ds_crop.v10*units('m/s'), 
+#                                              latitude=ds_crop.latitude, longitude=ds_crop.longitude).values
+#                 vort_grid = np.reshape(np.append(vort_grid, vort), (counter, *ds_crop.u10.values.shape))
 
-    era_map['u10'] = u10_grid
-    era_map['v10'] = v10_grid
+#     era_map['u10'] = u10_grid
+#     era_map['v10'] = v10_grid
     era_map['msl'] = msl_grid
-    era_map['vort'] = vort_grid
+#     era_map['vort'] = vort_grid
     
     era_map['lon'], era_map['lat'] = np.meshgrid(ds_crop.longitude.values, ds_crop.latitude.values)
 
