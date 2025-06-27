@@ -52,6 +52,10 @@ def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
             ax.set_xlim(-700000,500000)
             ax.set_ylim(-2400000,-1900000)
             
+        elif view == 'wide2':
+            ax.set_xlim(-750000,500000)
+            ax.set_ylim(-2400000,-1900000)
+            
         elif view == 'very_tall':
             ax.set_ylim(-2400000,-1300000)
             ax.set_xlim(-600000,450000)
@@ -179,23 +183,25 @@ def open_daily_drift(year, lat_range, lon_range, time_range = None):
 
 
 
-def drift_map_over_time(dates, map_proj, crop = True):
+def drift_map_over_time(dates, map_proj, crop = True, include_times = True):
 
     import warnings
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=RuntimeWarning)
- 
 
     if crop:
-        crop = [220,265,110,160]
+#         crop = [220,265,110,160]
+        crop = [240,250,110,140]
     else:
         crop = [0,None,0,None]
+        
+         
     drift_map = icedrift.open_local_file(pd.to_datetime(dates),
                         main_path = '/Volumes/Jewell_EasyStore/NSIDC-0116_PPdrift/', 
                         filenametype = 'icemotion_daily_nh_25km_{}0101_{}1231_v4.1.nc', 
                         crop = crop,
                         include_units = False)
-    
+
     E = np.nanmean(drift_map['e'], axis=0)
     N = np.nanmean(drift_map['n'], axis=0)
     # Ep, Np = geomap.fix_cartopy_vectors(E,N,drift_map['lat'])
@@ -205,7 +211,7 @@ def drift_map_over_time(dates, map_proj, crop = True):
 
     X_scaled = np.zeros(E.shape)
     Y_scaled = np.zeros(E.shape)
-    
+
     for ii in range(np.shape(E_scaled)[0]):
         for jj in range(np.shape(N_scaled)[0]):
 
@@ -221,20 +227,52 @@ def drift_map_over_time(dates, map_proj, crop = True):
 
             X_scaled[ii,jj] = tail[0]
             Y_scaled[ii,jj] = tail[1]
-            
+
         drift_map['E_scaled'] = E_scaled
         drift_map['N_scaled'] = N_scaled
-        
+
         drift_map['X_scaled'] = X_scaled
         drift_map['Y_scaled'] = Y_scaled
 
+#     else:
+        
+#         counter = 0
+#         for date in pd.to_datetime(dates):
+
+#             try:
+#                 drift_map = icedrift.open_local_file(date,
+#                                     main_path = '/Volumes/Jewell_EasyStore/NSIDC-0116_PPdrift/', 
+#                                     filenametype = 'icemotion_daily_nh_25km_{}0101_{}1231_v4.1.nc', 
+#                                     crop = crop,
+#                                     include_units = False)
+#                 counter+=1
+                
+#             except:
+#                 print(f'{date} not found')
+                
+#             if counter == 1:
+#                 E = drift_map['e']
+#                 N = drift_map['n']
+#                 S = np.sqrt(drift_map['e']**2 + drift_map['n']**2)
+#             else:
+#                 E += drift_map['e']
+#                 N += drift_map['n']
+#                 S += np.sqrt(drift_map['e']**2 + drift_map['n']**2)
+        
     warnings.filterwarnings("default", category=DeprecationWarning) 
     warnings.filterwarnings("default", category=RuntimeWarning)        
 
+#     if include_times == False:
+#         drift_map['E_mean'] = E/counter
+#         drift_map['N_mean'] = N/counter
+#         drift_map['S_mean'] = S/counter
+        
     return drift_map
 
 
-def wind_map_over_time(dates, map_proj, era_lat = slice(75, 68), era_lon = slice(-158,-125)):
+def wind_map_over_time(dates, map_proj, 
+                       era_lat = slice(75, 68), era_lon = slice(-158,-125), 
+                       include_times = True):
 
 
     era_map = {}
@@ -260,16 +298,29 @@ def wind_map_over_time(dates, map_proj, era_lat = slice(75, 68), era_lon = slice
 #                                              latitude=ds_crop.latitude, longitude=ds_crop.longitude).values
 
             else:
-                u10_grid = np.reshape(np.append(u10_grid, ds_crop.u10.values), (counter, *ds_crop.u10.values.shape))
-                v10_grid = np.reshape(np.append(v10_grid, ds_crop.v10.values), (counter, *ds_crop.u10.values.shape))
-                msl_grid = np.reshape(np.append(msl_grid, ds_crop.msl.values), (counter, *ds_crop.u10.values.shape))
-#                 vort = mpcalc.vorticity(ds_crop.u10*units('m/s'), ds_crop.v10*units('m/s'), 
+        
+                if include_times == True:
+                    u10_grid = np.reshape(np.append(u10_grid, ds_crop.u10.values), (counter, *ds_crop.u10.values.shape))
+                    v10_grid = np.reshape(np.append(v10_grid, ds_crop.v10.values), (counter, *ds_crop.u10.values.shape))
+                    msl_grid = np.reshape(np.append(msl_grid, ds_crop.msl.values), (counter, *ds_crop.u10.values.shape))
+                    
+                else:
+                    u10_grid += ds_crop.u10.values
+                    v10_grid += ds_crop.v10.values
+                    msl_grid += ds_crop.msl.values
+    #                 vort = mpcalc.vorticity(ds_crop.u10*units('m/s'), ds_crop.v10*units('m/s'), 
 #                                              latitude=ds_crop.latitude, longitude=ds_crop.longitude).values
 #                 vort_grid = np.reshape(np.append(vort_grid, vort), (counter, *ds_crop.u10.values.shape))
 
-    era_map['u10'] = u10_grid
-    era_map['v10'] = v10_grid
-    era_map['msl'] = msl_grid
+    if include_times == True:
+        era_map['u10'] = u10_grid
+        era_map['v10'] = v10_grid
+        era_map['msl'] = msl_grid
+    else:
+        era_map['u10'] = u10_grid/counter
+        era_map['v10'] = v10_grid/counter
+        era_map['msl'] = msl_grid/counter
+        
 #     era_map['vort'] = vort_grid
     
     era_map['lon'], era_map['lat'] = np.meshgrid(ds_crop.longitude.values, ds_crop.latitude.values)
