@@ -293,6 +293,7 @@ def wind_map_over_time(dates, map_proj,
             if counter == 1:
                 u10_grid = ds_crop.u10.values
                 v10_grid = ds_crop.v10.values
+                s10_grid = np.sqrt(ds_crop.u10.values**2+ds_crop.v10.values**2)
                 msl_grid = ds_crop.msl.values
 #                 vort_grid = mpcalc.vorticity(ds_crop.u10*units('m/s'), ds_crop.v10*units('m/s'), 
 #                                              latitude=ds_crop.latitude, longitude=ds_crop.longitude).values
@@ -302,11 +303,14 @@ def wind_map_over_time(dates, map_proj,
                 if include_times == True:
                     u10_grid = np.reshape(np.append(u10_grid, ds_crop.u10.values), (counter, *ds_crop.u10.values.shape))
                     v10_grid = np.reshape(np.append(v10_grid, ds_crop.v10.values), (counter, *ds_crop.u10.values.shape))
+                    s10_grid = np.reshape(np.append(s10_grid, np.sqrt(ds_crop.u10.values**2+ds_crop.v10.values**2)), 
+                                          (counter, *ds_crop.u10.values.shape))
                     msl_grid = np.reshape(np.append(msl_grid, ds_crop.msl.values), (counter, *ds_crop.u10.values.shape))
                     
                 else:
                     u10_grid += ds_crop.u10.values
                     v10_grid += ds_crop.v10.values
+                    s10_grid += np.sqrt(ds_crop.u10.values**2+ds_crop.v10.values**2)
                     msl_grid += ds_crop.msl.values
     #                 vort = mpcalc.vorticity(ds_crop.u10*units('m/s'), ds_crop.v10*units('m/s'), 
 #                                              latitude=ds_crop.latitude, longitude=ds_crop.longitude).values
@@ -315,14 +319,57 @@ def wind_map_over_time(dates, map_proj,
     if include_times == True:
         era_map['u10'] = u10_grid
         era_map['v10'] = v10_grid
+        era_map['s10'] = s10_grid
         era_map['msl'] = msl_grid
     else:
         era_map['u10'] = u10_grid/counter
         era_map['v10'] = v10_grid/counter
+        era_map['s10'] = s10_grid/counter
         era_map['msl'] = msl_grid/counter
         
 #     era_map['vort'] = vort_grid
     
+    era_map['lon'], era_map['lat'] = np.meshgrid(ds_crop.longitude.values, ds_crop.latitude.values)
+
+    return era_map
+
+
+def t2m_map_over_time(dates, map_proj, 
+                       era_lat = slice(75, 68), era_lon = slice(-158,-125), 
+                       include_times = True):
+
+
+    era_map = {}
+
+    counter = 0
+    for date in pd.to_datetime(dates):
+        try:
+            filename = f'/Volumes/Seagate_Jewell/KenzieStuff/ERA5/daily_t2m/ERA5_T2m_daily_{date.year}.nc'
+            with xr.open_dataset(filename) as ds:
+                ds_crop = ds.sel(valid_time=date, latitude=era_lat, longitude = era_lon)
+                counter+=1
+                exists=True
+        except:
+            print(f'missing {date}')
+            exists = False
+
+        if exists:
+            if counter == 1:
+                t2m_grid = ds_crop.t2m.values - 273.15
+            else:
+        
+                if include_times == True:
+                    t2m_grid = np.reshape(np.append(t2m_grid, ds_crop.t2m.values - 273.15), 
+                                          (counter, *ds_crop.t2m.values.shape))
+                    
+                else:
+                    t2m_grid += (ds_crop.t2m.values - 273.15)
+
+    if include_times == True:
+        era_map['t2m'] = t2m_grid
+    else:
+        era_map['t2m'] = t2m_grid/counter
+
     era_map['lon'], era_map['lat'] = np.meshgrid(ds_crop.longitude.values, ds_crop.latitude.values)
 
     return era_map
