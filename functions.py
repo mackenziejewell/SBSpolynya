@@ -18,7 +18,7 @@ from metpy.units import units
 sys.path.append('../')
 import plot_simply.geomap as geomap
 import geofunc.vectors as vectors
-import data_NSIDC.icedrift as icedrift
+import data_nsidc.icedrift as icedrift
 
 # standard maps to re-use throughout codes
 def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
