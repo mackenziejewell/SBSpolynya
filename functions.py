@@ -20,6 +20,45 @@ import plot_simply.geomap as geomap
 import geofunc.vectors as vectors
 import data_nsidc.icedrift as icedrift
 
+
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import matplotlib.path as mpath
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+
+
+def create_map_box(proj, lon_range=(-165, -120), lat_range = (68, 78)):
+    
+    # Bounding box in degrees
+    lon_min, lon_max = lon_range[0], lon_range[1]
+    lat_min, lat_max = lat_range[0], lat_range[1]
+    
+    # Sample points along each edge
+    npts = 100
+    # Sample border points:
+    # Bottom edge: latitude fixed at lat_min, lon varies left to right
+    bottom = [(lon, lat_min) for lon in np.linspace(lon_min, lon_max, npts)]
+    # Right edge: longitude fixed at lon_max, lat varies bottom to top
+    right = [(lon_max, lat) for lat in np.linspace(lat_min, lat_max, npts)]
+    # Top edge: latitude fixed at lat_max, lon varies right to left
+    top = [(lon, lat_max) for lon in np.linspace(lon_max, lon_min, npts)]
+    # Left edge: longitude fixed at lon_min, lat varies top to bottom
+    left = [(lon_min, lat) for lat in np.linspace(lat_max, lat_min, npts)]
+    
+    # Combine in order to make a closed polygon
+    all_coords = bottom + right + top + left
+
+    # Transform each point to map projection coordinates
+    projected_coords = [proj.transform_point(lon, lat, ccrs.PlateCarree()) for lon, lat in all_coords]
+
+    # Create a closed path
+    clip_path = mpath.Path(projected_coords)
+    
+    return clip_path
+
+
+
 # standard maps to re-use throughout codes
 def makemap(view = 'wide', contours = [], figsize=(8,6), panels=(1,1)):
 
