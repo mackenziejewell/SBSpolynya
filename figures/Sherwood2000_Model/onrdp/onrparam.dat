@@ -1,0 +1,38 @@
+## onrparam.dat
+## contains parameters for onr1d model
+## STANDARD CASE - MY
+h  22.	# water depth [m]
+dz .2	# vertical grid spacing [m]
+nzinc 23 # number of output levels
+ntinc 3600
+dt 5.		# time step [s]
+nt 51841	# no. of time steps
+zos 0.05	# suface roughness ks = 30*zos = 0.05 [m]
+zobmin 0.0005  	# bottom roughness
+ks .0015	# bottom sediment size [m]
+Cdmin 0.0025	# minimum bottom drag coefficient
+rhobar 1025.	# mean water density [kg m-3]
+iverbose 1	# flag for extra output
+ibbc 2		# flag for bottom bc (0=no slip, 1=Cd, 2=wave/current)
+iktype 4	# eddy visc. flag (0=const, 1=bilinear, 2=cubic, 4=MY2.5)
+ixshelf 1       # 0=no xshelf slope; 1=xshelf slope balances transport
+itfreeze 0      # 0 = tfreeze(S,P), 1 = tfreeze(S,0), 2 = const. at surface S
+idensflg 1      # 0=full eqn., 1 = quadratic approx.
+isrestart 0	# flag to read extra columns in init file
+ilenflag 1      # 0=bigL, 1=q2l/q2
+iiwmflag 1      # 0=none, 1=internal-wave mixing parameterization
+ibigLflag 1     # 0=parabolic, 1=bilinear
+alpha 0.2       # constant in length scale eqn. []
+zetaff 1.0	# time-filter factor for shear (1.0 is standard)
+Kconst 0.08	# value for constant eddy viscosity
+rlat  75.	# latitude [degrees North]
+fetch 100000.	# wind fetch [m]
+nice 1		# number of ice classes, maximum set by NICEMAX
+1. 0.5e-3 0.09e-2	# fri [] ri [m] wi [m/s]
+iss 0		# sus. sed. bbc flag (0=ref. conc., 1=flux)
+nsed 2		# number of sed classes, maximum set by NSEDMAX
+1. 0.044e-3 	-.115e-2  .1 # fri [] D50 [m] ws [m/s] tauc [N m-2] 4.5 phi
+0. 0.016e-3 	-.014e-2  .1 # fri [] D50 [m] ws [m/s] tauc [N m-2] 6 phi
+Cb 0.4		# bed concentration
+gamma0 0.002	# sus. sed. coefficient
+
