@@ -63,11 +63,12 @@ dependencies:
   - bzip2=1.0.8=h6c40b1e_5
   - c-ares=1.19.1=h6c40b1e_0
   - c-blosc2=2.14.4=h0ae8482_1
-  - ca-certificates=2024.12.31=hecd8cb5_0
+  - ca-certificates=2025.2.25=hecd8cb5_0
   - cached-property=1.5.2=py_0
   - cachetools=4.2.2=pyhd3eb1b0_0
   - cartopy=0.23.0=py312h1171441_1
-  - certifi=2025.1.31=py312hecd8cb5_0
+  - cdsapi=0.7.6=pyhd8ed1ab_0
+  - certifi=2025.4.26=py312hecd8cb5_0
   - cffi=1.16.0=py312h6c40b1e_0
   - cfitsio=3.470=hbd21bf8_7
   - cftime=1.6.2=py312h32608ca_1
@@ -102,6 +103,7 @@ dependencies:
   - distributed=2023.11.0=py312hecd8cb5_0
   - docstring-to-markdown=0.11=py312hecd8cb5_0
   - docutils=0.18.1=py312hecd8cb5_3
+  - ecmwf-datastores-client=0.1.0=pyhd8ed1ab_0
   - entrypoints=0.4=py312hecd8cb5_0
   - eofs=1.4.1=pyhd8ed1ab_1
   - et_xmlfile=1.1.0=py312hecd8cb5_1
@@ -262,6 +264,7 @@ dependencies:
   - msgpack-python=1.0.3=py312ha357a0b_0
   - multidict=6.0.4=py312h6c40b1e_0
   - multipledispatch=0.6.0=py312hecd8cb5_0
+  - multiurl=0.3.5=pyhd8ed1ab_0
   - munkres=1.1.4=py_0
   - mypy=1.8.0=py312h6c40b1e_0
   - mypy_extensions=1.0.0=py312hecd8cb5_0
@@ -285,7 +288,7 @@ dependencies:
   - openblas=0.3.1=hd130d23_0
   - openjpeg=2.4.0=h66ea3da_0
   - openpyxl=3.0.10=py312h6c40b1e_0
-  - openssl=3.4.1=hc426f3f_0
+  - openssl=3.5.0=hc426f3f_1
   - orc=1.7.4=h995b336_1
   - overrides=7.4.0=py312hecd8cb5_0
   - packaging=23.2=py312hecd8cb5_0
