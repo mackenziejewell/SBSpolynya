@@ -1,8 +1,8 @@
 # SBSpolynya
-analysis os Southern Beaufort Sea polynya.
+Analysis of polynya formation over the Beaufort Shelf.
+
 
 ### To build matching environment:
-
 (1) Navigate to folder in terminal and run:
 conda env create --file=environment.yml
 
